@@ -10,6 +10,166 @@
         background: linear-gradient(to bottom, #a0e9ff, #ffffff);
         font-family: sans-serif;
     }
+    h1 {
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+    .card {
+        padding: 10px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        cursor: grab;
+        margin: 5px;
+        transition: transform 0.3s;
+        text-align: center;
+        width: 150px;
+    }
+    .card:hover {
+        transform: scale(1.05);
+    }
+    .pyramid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    .slot {
+        width: 150px;
+        height: 60px;
+        border-radius: 8px;
+        border: 2px dashed #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+    }
+    .slot.correct {
+        background-color: #34d399;
+        border: 2px solid #059669;
+    }
+</style>
+</head>
+<body class="p-5">
+
+<h1 class="text-4xl text-center font-bold text-green-700 mb-6">Sog'lom Hayot Piramidasi</h1>
+<p class="text-center mb-6 text-gray-700">Kartalarni to‘g‘ri piramida qatlamlariga joylashtiring!</p>
+
+<div id="cards-container" class="flex justify-center flex-wrap mb-6 gap-3">
+    <!-- Kartalar shu yerga qo‘yiladi -->
+</div>
+
+<div class="pyramid" id="pyramid">
+    <!-- Piramida qatorlari -->
+</div>
+
+<div class="text-center mt-6 mb-6">
+    <button id="checkScore" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Ballni Tekshirish</button>
+</div>
+
+<div id="score" class="text-center text-2xl font-bold text-green-700"></div>
+
+<script>
+const habits = [
+    {name: "Chekish", level: 1},
+    {name: "Giyohvandlik sinab ko‘rish", level: 1},
+    {name: "Telefon bilan kechqurun o‘ynash", level: 2},
+    {name: "Uyquga vaqt ajratmaslik", level: 2},
+    {name: "Tezkor ovqatlar", level: 3},
+    {name: "Do‘stlar bilan tashqariga chiqish", level: 4},
+    {name: "Kitob o‘qish", level: 5},
+    {name: "Sport bilan shug‘ullanish", level: 5},
+    {name: "Sog‘lom ovqatlanish", level: 5},
+    {name: "Suv ichish", level: 5},
+];
+
+const cardsContainer = document.getElementById("cards-container");
+const pyramid = document.getElementById("pyramid");
+
+// Kartalarni yaratish
+habits.forEach((habit, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.draggable = true;
+    card.dataset.level = habit.level;
+    card.innerText = habit.name;
+    cardsContainer.appendChild(card);
+
+    card.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", i);
+    });
+});
+
+// Piramida yaratish: 5 qator
+const rowSlots = [1,2,3,4,5]; // piramida qator slotlari
+rowSlots.forEach(level => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+    rowDiv.dataset.level = level;
+
+    for(let i=0; i<level; i++){
+        const slot = document.createElement("div");
+        slot.className = "slot";
+        slot.dataset.level = level;
+        slot.addEventListener("dragover", (e)=>e.preventDefault());
+        slot.addEventListener("drop", (e)=>{
+            e.preventDefault();
+            const cardIndex = e.dataTransfer.getData("text/plain");
+            const card = cardsContainer.children[cardIndex];
+
+            // faqat to‘g‘ri qatorda joylashish
+            if(parseInt(card.dataset.level) === parseInt(slot.dataset.level)){
+                slot.appendChild(card);
+                slot.classList.add("correct");
+            } else {
+                alert("Bu kartani bu qatorga qo‘ya olmaysiz! To‘g‘ri qatorda joylashtiring.");
+            }
+        });
+        rowDiv.appendChild(slot);
+    }
+    pyramid.appendChild(rowDiv);
+});
+
+// Ballni hisoblash
+document.getElementById("checkScore").addEventListener("click", ()=>{
+    let score = 0;
+    const slots = document.querySelectorAll(".slot");
+    slots.forEach(slot=>{
+        const card = slot.querySelector(".card");
+        if(card){
+            if(parseInt(card.dataset.level) === parseInt(slot.dataset.level)){
+                score += 2;
+            } else {
+                score -= 1;
+            }
+        }
+    });
+    document.getElementById("score").innerText = `Sizning ballingiz: ${score}`;
+});
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sog'lom Hayot Piramidasi</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body {
+        background: linear-gradient(to bottom, #a0e9ff, #ffffff);
+        font-family: sans-serif;
+    }
 
     h1 {
         animation: bounce 2s infinite;
