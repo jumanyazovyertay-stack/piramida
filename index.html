@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sog'lom Hayot Piramidasi</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body {
+        background: linear-gradient(to bottom, #a0e9ff, #ffffff);
+    }
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+        transform: scale(1.1);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    #pyramid {
+        width: 300px;
+        margin: auto;
+        position: relative;
+    }
+    .level {
+        height: 60px;
+        margin: 5px 0;
+        border-radius: 10px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+</style>
+</head>
+<body class="p-5">
+
+<h1 class="text-4xl text-center font-bold text-green-700 mb-6 animate-bounce">Sog'lom Hayot Piramidasi</h1>
+<p class="text-center mb-6 text-gray-700">Foydali va zararli odatlarni pastga yoki piramida bo‘ylab joylashtiring!</p>
+
+<div class="flex justify-center mb-6 flex-wrap gap-3" id="cards">
+    <!-- Kartalar -->
+</div>
+
+<div id="pyramid" class="mb-6">
+    <div class="level bg-red-500" data-level="1">Zararli odatlar</div>
+    <div class="level bg-orange-400" data-level="2">Kam foydali odatlar</div>
+    <div class="level bg-yellow-400" data-level="3">O‘rtacha foydali odatlar</div>
+    <div class="level bg-green-500" data-level="4">Foydali odatlar</div>
+    <div class="level bg-blue-500" data-level="5">Eng foydali odatlar</div>
+</div>
+
+<div class="text-center mb-6">
+    <button id="scoreBtn" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Ballni Tekshirish</button>
+</div>
+
+<div id="score" class="text-center text-2xl font-bold text-green-700"></div>
+
+<script>
+const habits = [
+    {name: "Chekish", level: 1},
+    {name: "Telefon bilan kechqurun o‘ynash", level: 2},
+    {name: "Kitob o‘qish", level: 5},
+    {name: "Sport bilan shug‘ullanish", level: 5},
+    {name: "Sog‘lom ovqatlanish", level: 5},
+    {name: "Tezkor ovqatlar", level: 3},
+    {name: "Uyquga vaqt ajratmaslik", level: 2},
+    {name: "Suv ichish", level: 5},
+    {name: "Do‘stlar bilan tashqariga chiqish", level: 4},
+    {name: "Giyohvandlik sinab ko‘rish", level: 1},
+];
+
+const cardsContainer = document.getElementById("cards");
+
+// Kartalarni yaratish
+habits.forEach((habit, i) => {
+    const card = document.createElement("div");
+    card.className = "card bg-white p-3 rounded-lg shadow-md cursor-pointer";
+    card.draggable = true;
+    card.dataset.level = habit.level;
+    card.innerText = habit.name;
+    cardsContainer.appendChild(card);
+
+    card.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", i);
+    });
+});
+
+const levels = document.querySelectorAll(".level");
+
+levels.forEach(level => {
+    level.addEventListener("dragover", (e) => e.preventDefault());
+    level.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const cardIndex = e.dataTransfer.getData("text/plain");
+        const card = cardsContainer.children[cardIndex];
+        level.appendChild(card);
+    });
+});
+
+// Ballni hisoblash
+document.getElementById("scoreBtn").addEventListener("click", () => {
+    let score = 0;
+    levels.forEach(level => {
+        const cards = level.querySelectorAll(".card");
+        cards.forEach(card => {
+            if(parseInt(card.dataset.level) === parseInt(level.dataset.level)){
+                score += 2; // to‘g‘ri joylashgan – 2 ball
+            } else {
+                score -= 1; // noto‘g‘ri – 1 ball
+            }
+        });
+    });
+    document.getElementById("score").innerText = `Sizning ballingiz: ${score}`;
+});
+</script>
+
+</body>
+</html>
