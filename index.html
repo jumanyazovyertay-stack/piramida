@@ -8,51 +8,95 @@
 <style>
     body {
         background: linear-gradient(to bottom, #a0e9ff, #ffffff);
+        font-family: sans-serif;
     }
+
+    h1 {
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
     .card {
-        transition: transform 0.3s, box-shadow 0.3s;
+        padding: 10px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        cursor: grab;
+        margin: 5px;
+        transition: transform 0.3s;
+        text-align: center;
+        width: 150px;
     }
+
     .card:hover {
-        transform: scale(1.1);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        transform: scale(1.05);
     }
-    #pyramid {
-        width: 300px;
-        margin: auto;
-        position: relative;
+
+    .pyramid-row {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+        min-height: 70px;
     }
+
     .level {
-        height: 60px;
-        margin: 5px 0;
+        padding: 10px;
         border-radius: 10px;
         color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        text-align: center;
         font-weight: bold;
-        font-size: 18px;
+        font-size: 16px;
+        min-width: 120px;
+        margin: 0 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        min-height: 70px;
+        transition: background 0.3s;
+    }
+
+    #cards-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
     }
 </style>
 </head>
 <body class="p-5">
 
-<h1 class="text-4xl text-center font-bold text-green-700 mb-6 animate-bounce">Sog'lom Hayot Piramidasi</h1>
-<p class="text-center mb-6 text-gray-700">Foydali va zararli odatlarni pastga yoki piramida bo‘ylab joylashtiring!</p>
+<h1 class="text-4xl text-center font-bold text-green-700 mb-6">Sog'lom Hayot Piramidasi</h1>
+<p class="text-center mb-6 text-gray-700">Kartalarni to‘g‘ri piramida qatlamlariga joylashtiring!</p>
 
-<div class="flex justify-center mb-6 flex-wrap gap-3" id="cards">
-    <!-- Kartalar -->
+<div id="cards-container">
+    <!-- Kartalar shu yerga qo‘yiladi -->
 </div>
 
-<div id="pyramid" class="mb-6">
-    <div class="level bg-red-500" data-level="1">Zararli odatlar</div>
-    <div class="level bg-orange-400" data-level="2">Kam foydali odatlar</div>
-    <div class="level bg-yellow-400" data-level="3">O‘rtacha foydali odatlar</div>
-    <div class="level bg-green-500" data-level="4">Foydali odatlar</div>
-    <div class="level bg-blue-500" data-level="5">Eng foydali odatlar</div>
+<div id="pyramid">
+    <div class="pyramid-row" data-level="1">
+        <div class="level bg-red-500">Zararli odatlar</div>
+    </div>
+    <div class="pyramid-row" data-level="2">
+        <div class="level bg-orange-400">Kam foydali odatlar</div>
+    </div>
+    <div class="pyramid-row" data-level="3">
+        <div class="level bg-yellow-400">O‘rtacha foydali odatlar</div>
+    </div>
+    <div class="pyramid-row" data-level="4">
+        <div class="level bg-green-500">Foydali odatlar</div>
+    </div>
+    <div class="pyramid-row" data-level="5">
+        <div class="level bg-blue-500">Eng foydali odatlar</div>
+    </div>
 </div>
 
-<div class="text-center mb-6">
-    <button id="scoreBtn" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Ballni Tekshirish</button>
+<div class="text-center mt-6 mb-6">
+    <button id="checkScore" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Ballni Tekshirish</button>
 </div>
 
 <div id="score" class="text-center text-2xl font-bold text-green-700"></div>
@@ -71,12 +115,12 @@ const habits = [
     {name: "Giyohvandlik sinab ko‘rish", level: 1},
 ];
 
-const cardsContainer = document.getElementById("cards");
+const cardsContainer = document.getElementById("cards-container");
 
 // Kartalarni yaratish
 habits.forEach((habit, i) => {
     const card = document.createElement("div");
-    card.className = "card bg-white p-3 rounded-lg shadow-md cursor-pointer";
+    card.className = "card";
     card.draggable = true;
     card.dataset.level = habit.level;
     card.innerText = habit.name;
@@ -87,28 +131,36 @@ habits.forEach((habit, i) => {
     });
 });
 
-const levels = document.querySelectorAll(".level");
+// Piramida qatlamlariga drop qilish
+const pyramidRows = document.querySelectorAll(".pyramid-row");
 
-levels.forEach(level => {
-    level.addEventListener("dragover", (e) => e.preventDefault());
-    level.addEventListener("drop", (e) => {
+pyramidRows.forEach(row => {
+    row.addEventListener("dragover", (e) => e.preventDefault());
+    row.addEventListener("drop", (e) => {
         e.preventDefault();
         const cardIndex = e.dataTransfer.getData("text/plain");
         const card = cardsContainer.children[cardIndex];
-        level.appendChild(card);
+
+        // Faqat to‘g‘ri qatorga qo‘yish
+        if(parseInt(card.dataset.level) === parseInt(row.dataset.level)){
+            row.appendChild(card);
+            row.querySelector(".level").style.background = "#34d399"; // yashil bo‘lsin to‘g‘ri joylashsa
+        } else {
+            alert("Bu qator sizning kartangiz uchun noto‘g‘ri! To‘g‘ri qatorga joylashtiring.");
+        }
     });
 });
 
 // Ballni hisoblash
-document.getElementById("scoreBtn").addEventListener("click", () => {
+document.getElementById("checkScore").addEventListener("click", () => {
     let score = 0;
-    levels.forEach(level => {
-        const cards = level.querySelectorAll(".card");
+    pyramidRows.forEach(row => {
+        const cards = row.querySelectorAll(".card");
         cards.forEach(card => {
-            if(parseInt(card.dataset.level) === parseInt(level.dataset.level)){
-                score += 2; // to‘g‘ri joylashgan – 2 ball
+            if(parseInt(card.dataset.level) === parseInt(row.dataset.level)){
+                score += 2;
             } else {
-                score -= 1; // noto‘g‘ri – 1 ball
+                score -= 1;
             }
         });
     });
