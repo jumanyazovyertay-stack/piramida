@@ -6,326 +6,157 @@
 <title>Sog'lom Hayot Piramidasi</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-    body {
-        background: linear-gradient(to bottom, #a0e9ff, #ffffff);
-        font-family: sans-serif;
-    }
-    h1 {
-        animation: bounce 2s infinite;
-    }
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-15px); }
-    }
-    .card {
-        padding: 10px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        cursor: grab;
-        margin: 5px;
-        transition: transform 0.3s;
-        text-align: center;
-        width: 150px;
-    }
-    .card:hover {
-        transform: scale(1.05);
-    }
-    .pyramid {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-    .row {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-    }
-    .slot {
-        width: 150px;
-        height: 60px;
-        border-radius: 8px;
-        border: 2px dashed #999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.3s;
-    }
-    .slot.correct {
-        background-color: #34d399;
-        border: 2px solid #059669;
-    }
+body{
+    background: linear-gradient(to bottom, #c7f9ff, #ffffff);
+    font-family: sans-serif;
+}
+.card{
+    padding:10px;
+    background:white;
+    border-radius:8px;
+    box-shadow:0 4px 6px rgba(0,0,0,0.2);
+    cursor:grab;
+    width:160px;
+    text-align:center;
+}
+.pyramid{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+}
+.row{
+    display:flex;
+    gap:10px;
+}
+.slot{
+    width:160px;
+    height:60px;
+    border:2px dashed #999;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.correct{
+    background:#86efac;
+    border:2px solid #16a34a;
+}
 </style>
 </head>
-<body class="p-5">
+<body class="p-6">
 
-<h1 class="text-4xl text-center font-bold text-green-700 mb-6">Sog'lom Hayot Piramidasi</h1>
-<p class="text-center mb-6 text-gray-700">Kartalarni to‘g‘ri piramida qatlamlariga joylashtiring!</p>
+<h1 class="text-4xl font-bold text-center text-green-700 mb-4">
+Sog'lom Hayot Piramidasi
+</h1>
 
-<div id="cards-container" class="flex justify-center flex-wrap mb-6 gap-3">
-    <!-- Kartalar shu yerga qo‘yiladi -->
+<p class="text-center mb-6 text-gray-700">
+Kartalarni to‘g‘ri darajaga joylashtiring. Pastda zararli, yuqorida eng foydali!
+</p>
+
+<div id="cards" class="flex flex-wrap justify-center gap-3 mb-8"></div>
+
+<div class="pyramid" id="pyramid"></div>
+
+<div class="text-center mt-6">
+<button id="finish"
+class="bg-purple-600 text-white px-4 py-2 rounded">
+Yakunlash
+</button>
 </div>
 
-<div class="pyramid" id="pyramid">
-    <!-- Piramida qatorlari -->
-</div>
-
-<div class="text-center mt-6 mb-6">
-    <button id="checkScore" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Ballni Tekshirish</button>
-</div>
-
-<div id="score" class="text-center text-2xl font-bold text-green-700"></div>
+<div id="result" class="text-center mt-6 text-2xl font-bold text-blue-700"></div>
 
 <script>
+
+// HAR DARAJAGA MOS MIQDORDA ODATLAR
 const habits = [
-    {name: "Chekish", level: 1},
-    {name: "Giyohvandlik sinab ko‘rish", level: 1},
-    {name: "Telefon bilan kechqurun o‘ynash", level: 2},
-    {name: "Uyquga vaqt ajratmaslik", level: 2},
-    {name: "Tezkor ovqatlar", level: 3},
-    {name: "Do‘stlar bilan tashqariga chiqish", level: 4},
-    {name: "Kitob o‘qish", level: 5},
-    {name: "Sport bilan shug‘ullanish", level: 5},
-    {name: "Sog‘lom ovqatlanish", level: 5},
-    {name: "Suv ichish", level: 5},
+
+{ name:"Giyohvandlik", level:1 },
+
+{ name:"Chekish", level:2 },
+{ name:"Energetik ichimlik", level:2 },
+
+{ name:"Fast food", level:3 },
+{ name:"Telefonni ko‘p ishlatish", level:3 },
+{ name:"Uyqu rejimini buzish", level:3 },
+
+{ name:"Sport bilan shug‘ullanish", level:4 },
+{ name:"Toza havoda sayr", level:4 },
+{ name:"Kitob o‘qish", level:4 },
+{ name:"Ijobiy do‘stlar", level:4 },
+
+{ name:"Sog‘lom ovqatlanish", level:5 },
+{ name:"Suv ichish", level:5 },
+{ name:"8 soat uyqu", level:5 },
+{ name:"Ota-onani hurmat qilish", level:5 },
+{ name:"Maqsad qo‘yish", level:5 }
+
 ];
 
-const cardsContainer = document.getElementById("cards-container");
-const pyramid = document.getElementById("pyramid");
+const cardsDiv=document.getElementById("cards");
+const pyramid=document.getElementById("pyramid");
 
-// Kartalarni yaratish
-habits.forEach((habit, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.draggable = true;
-    card.dataset.level = habit.level;
-    card.innerText = habit.name;
-    cardsContainer.appendChild(card);
+// Kartalarni chiqarish
+habits.forEach((habit,i)=>{
+let card=document.createElement("div");
+card.className="card";
+card.innerText=habit.name;
+card.draggable=true;
+card.dataset.level=habit.level;
+cardsDiv.appendChild(card);
 
-    card.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", i);
-    });
+card.addEventListener("dragstart",e=>{
+e.dataTransfer.setData("text/plain",i);
+});
 });
 
-// Piramida yaratish: 5 qator
-const rowSlots = [1,2,3,4,5]; // piramida qator slotlari
-rowSlots.forEach(level => {
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "row";
-    rowDiv.dataset.level = level;
+// PIRAMIDA SLOT SONI: 1-2-3-4-5
+for(let level=1; level<=5; level++){
+let row=document.createElement("div");
+row.className="row";
+row.dataset.level=level;
 
-    for(let i=0; i<level; i++){
-        const slot = document.createElement("div");
-        slot.className = "slot";
-        slot.dataset.level = level;
-        slot.addEventListener("dragover", (e)=>e.preventDefault());
-        slot.addEventListener("drop", (e)=>{
-            e.preventDefault();
-            const cardIndex = e.dataTransfer.getData("text/plain");
-            const card = cardsContainer.children[cardIndex];
+for(let i=0;i<level;i++){
+let slot=document.createElement("div");
+slot.className="slot";
+slot.dataset.level=level;
 
-            // faqat to‘g‘ri qatorda joylashish
-            if(parseInt(card.dataset.level) === parseInt(slot.dataset.level)){
-                slot.appendChild(card);
-                slot.classList.add("correct");
-            } else {
-                alert("Bu kartani bu qatorga qo‘ya olmaysiz! To‘g‘ri qatorda joylashtiring.");
-            }
-        });
-        rowDiv.appendChild(slot);
-    }
-    pyramid.appendChild(rowDiv);
+slot.addEventListener("dragover",e=>e.preventDefault());
+
+slot.addEventListener("drop",e=>{
+e.preventDefault();
+let index=e.dataTransfer.getData("text/plain");
+let card=cardsDiv.children[index];
+
+if(parseInt(card.dataset.level)===level){
+slot.appendChild(card);
+slot.classList.add("correct");
+}else{
+alert("Bu daraja uchun mos emas!");
+}
 });
 
-// Ballni hisoblash
-document.getElementById("checkScore").addEventListener("click", ()=>{
-    let score = 0;
-    const slots = document.querySelectorAll(".slot");
-    slots.forEach(slot=>{
-        const card = slot.querySelector(".card");
-        if(card){
-            if(parseInt(card.dataset.level) === parseInt(slot.dataset.level)){
-                score += 2;
-            } else {
-                score -= 1;
-            }
-        }
-    });
-    document.getElementById("score").innerText = `Sizning ballingiz: ${score}`;
-});
-</script>
+row.appendChild(slot);
+}
+pyramid.appendChild(row);
+}
 
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sog'lom Hayot Piramidasi</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-    body {
-        background: linear-gradient(to bottom, #a0e9ff, #ffffff);
-        font-family: sans-serif;
-    }
-
-    h1 {
-        animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-15px); }
-    }
-
-    .card {
-        padding: 10px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        cursor: grab;
-        margin: 5px;
-        transition: transform 0.3s;
-        text-align: center;
-        width: 150px;
-    }
-
-    .card:hover {
-        transform: scale(1.05);
-    }
-
-    .pyramid-row {
-        display: flex;
-        justify-content: center;
-        margin: 10px 0;
-        min-height: 70px;
-    }
-
-    .level {
-        padding: 10px;
-        border-radius: 10px;
-        color: white;
-        text-align: center;
-        font-weight: bold;
-        font-size: 16px;
-        min-width: 120px;
-        margin: 0 5px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        min-height: 70px;
-        transition: background 0.3s;
-    }
-
-    #cards-container {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-    }
-</style>
-</head>
-<body class="p-5">
-
-<h1 class="text-4xl text-center font-bold text-green-700 mb-6">Sog'lom Hayot Piramidasi</h1>
-<p class="text-center mb-6 text-gray-700">Kartalarni to‘g‘ri piramida qatlamlariga joylashtiring!</p>
-
-<div id="cards-container">
-    <!-- Kartalar shu yerga qo‘yiladi -->
-</div>
-
-<div id="pyramid">
-    <div class="pyramid-row" data-level="1">
-        <div class="level bg-red-500">Zararli odatlar</div>
-    </div>
-    <div class="pyramid-row" data-level="2">
-        <div class="level bg-orange-400">Kam foydali odatlar</div>
-    </div>
-    <div class="pyramid-row" data-level="3">
-        <div class="level bg-yellow-400">O‘rtacha foydali odatlar</div>
-    </div>
-    <div class="pyramid-row" data-level="4">
-        <div class="level bg-green-500">Foydali odatlar</div>
-    </div>
-    <div class="pyramid-row" data-level="5">
-        <div class="level bg-blue-500">Eng foydali odatlar</div>
-    </div>
-</div>
-
-<div class="text-center mt-6 mb-6">
-    <button id="checkScore" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Ballni Tekshirish</button>
-</div>
-
-<div id="score" class="text-center text-2xl font-bold text-green-700"></div>
-
-<script>
-const habits = [
-    {name: "Chekish", level: 1},
-    {name: "Telefon bilan kechqurun o‘ynash", level: 2},
-    {name: "Kitob o‘qish", level: 5},
-    {name: "Sport bilan shug‘ullanish", level: 5},
-    {name: "Sog‘lom ovqatlanish", level: 5},
-    {name: "Tezkor ovqatlar", level: 3},
-    {name: "Uyquga vaqt ajratmaslik", level: 2},
-    {name: "Suv ichish", level: 5},
-    {name: "Do‘stlar bilan tashqariga chiqish", level: 4},
-    {name: "Giyohvandlik sinab ko‘rish", level: 1},
-];
-
-const cardsContainer = document.getElementById("cards-container");
-
-// Kartalarni yaratish
-habits.forEach((habit, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.draggable = true;
-    card.dataset.level = habit.level;
-    card.innerText = habit.name;
-    cardsContainer.appendChild(card);
-
-    card.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", i);
-    });
+// YAKUNIY XULOSA
+document.getElementById("finish").addEventListener("click",()=>{
+let countLevel5=0;
+document.querySelectorAll(".slot").forEach(slot=>{
+let card=slot.querySelector(".card");
+if(card && parseInt(card.dataset.level)===5){
+countLevel5++;
+}
 });
 
-// Piramida qatlamlariga drop qilish
-const pyramidRows = document.querySelectorAll(".pyramid-row");
-
-pyramidRows.forEach(row => {
-    row.addEventListener("dragover", (e) => e.preventDefault());
-    row.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const cardIndex = e.dataTransfer.getData("text/plain");
-        const card = cardsContainer.children[cardIndex];
-
-        // Faqat to‘g‘ri qatorga qo‘yish
-        if(parseInt(card.dataset.level) === parseInt(row.dataset.level)){
-            row.appendChild(card);
-            row.querySelector(".level").style.background = "#34d399"; // yashil bo‘lsin to‘g‘ri joylashsa
-        } else {
-            alert("Bu qator sizning kartangiz uchun noto‘g‘ri! To‘g‘ri qatorga joylashtiring.");
-        }
-    });
+document.getElementById("result").innerHTML=
+"Siz tanlagan eng foydali odatlar soni: "+countLevel5+
+"<br><br>O'zingiz uchun savol: Qaysi odatni bugundan boshlaysiz?";
 });
 
-// Ballni hisoblash
-document.getElementById("checkScore").addEventListener("click", () => {
-    let score = 0;
-    pyramidRows.forEach(row => {
-        const cards = row.querySelectorAll(".card");
-        cards.forEach(card => {
-            if(parseInt(card.dataset.level) === parseInt(row.dataset.level)){
-                score += 2;
-            } else {
-                score -= 1;
-            }
-        });
-    });
-    document.getElementById("score").innerText = `Sizning ballingiz: ${score}`;
-});
 </script>
 
 </body>
