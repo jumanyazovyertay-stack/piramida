@@ -16,7 +16,7 @@ body{
     border-radius:8px;
     box-shadow:0 4px 6px rgba(0,0,0,0.2);
     cursor:grab;
-    width:160px;
+    width:170px;
     text-align:center;
 }
 .pyramid{
@@ -30,7 +30,7 @@ body{
     gap:10px;
 }
 .slot{
-    width:160px;
+    width:170px;
     height:60px;
     border:2px dashed #999;
     border-radius:8px;
@@ -51,71 +51,61 @@ Sog'lom Hayot Piramidasi
 </h1>
 
 <p class="text-center mb-6 text-gray-700">
-Kartalarni to‘g‘ri darajaga joylashtiring. Pastda zararli, yuqorida eng foydali!
+Kartani tanlab, mos darajadagi katakka olib boring.
 </p>
 
 <div id="cards" class="flex flex-wrap justify-center gap-3 mb-8"></div>
 
 <div class="pyramid" id="pyramid"></div>
 
-<div class="text-center mt-6">
-<button id="finish"
-class="bg-purple-600 text-white px-4 py-2 rounded">
-Yakunlash
-</button>
-</div>
-
-<div id="result" class="text-center mt-6 text-2xl font-bold text-blue-700"></div>
-
 <script>
 
-// HAR DARAJAGA MOS MIQDORDA ODATLAR
+// HAR DARAJAGA MOS ODATLAR
 const habits = [
+{ id:1, name:"Giyohvandlik", level:1 },
 
-{ name:"Giyohvandlik", level:1 },
+{ id:2, name:"Chekish", level:2 },
+{ id:3, name:"Energetik ichimlik", level:2 },
 
-{ name:"Chekish", level:2 },
-{ name:"Energetik ichimlik", level:2 },
+{ id:4, name:"Fast food", level:3 },
+{ id:5, name:"Telefonni ko‘p ishlatish", level:3 },
+{ id:6, name:"Uyqu rejimini buzish", level:3 },
 
-{ name:"Fast food", level:3 },
-{ name:"Telefonni ko‘p ishlatish", level:3 },
-{ name:"Uyqu rejimini buzish", level:3 },
+{ id:7, name:"Sport bilan shug‘ullanish", level:4 },
+{ id:8, name:"Toza havoda sayr", level:4 },
+{ id:9, name:"Kitob o‘qish", level:4 },
+{ id:10, name:"Ijobiy do‘stlar", level:4 },
 
-{ name:"Sport bilan shug‘ullanish", level:4 },
-{ name:"Toza havoda sayr", level:4 },
-{ name:"Kitob o‘qish", level:4 },
-{ name:"Ijobiy do‘stlar", level:4 },
-
-{ name:"Sog‘lom ovqatlanish", level:5 },
-{ name:"Suv ichish", level:5 },
-{ name:"8 soat uyqu", level:5 },
-{ name:"Ota-onani hurmat qilish", level:5 },
-{ name:"Maqsad qo‘yish", level:5 }
-
+{ id:11, name:"Sog‘lom ovqatlanish", level:5 },
+{ id:12, name:"Suv ichish", level:5 },
+{ id:13, name:"8 soat uyqu", level:5 },
+{ id:14, name:"Ota-onani hurmat qilish", level:5 },
+{ id:15, name:"Maqsad qo‘yish", level:5 }
 ];
 
 const cardsDiv=document.getElementById("cards");
 const pyramid=document.getElementById("pyramid");
 
-// Kartalarni chiqarish
-habits.forEach((habit,i)=>{
+// KARTALAR
+habits.forEach(habit=>{
 let card=document.createElement("div");
 card.className="card";
 card.innerText=habit.name;
 card.draggable=true;
 card.dataset.level=habit.level;
+card.id="card-"+habit.id;
+
 cardsDiv.appendChild(card);
 
 card.addEventListener("dragstart",e=>{
-e.dataTransfer.setData("text/plain",i);
+e.dataTransfer.setData("text/plain",card.id);
 });
 });
 
-// PIRAMIDA SLOT SONI: 1-2-3-4-5
+// PIRAMIDA (1-2-3-4-5)
 for(let level=1; level<=5; level++){
 let row=document.createElement("div");
 row.className="row";
-row.dataset.level=level;
 
 for(let i=0;i<level;i++){
 let slot=document.createElement("div");
@@ -126,14 +116,16 @@ slot.addEventListener("dragover",e=>e.preventDefault());
 
 slot.addEventListener("drop",e=>{
 e.preventDefault();
-let index=e.dataTransfer.getData("text/plain");
-let card=cardsDiv.children[index];
+let cardId=e.dataTransfer.getData("text/plain");
+let card=document.getElementById(cardId);
 
-if(parseInt(card.dataset.level)===level){
-slot.appendChild(card);
-slot.classList.add("correct");
-}else{
-alert("Bu daraja uchun mos emas!");
+if(!slot.hasChildNodes()){   // slot bo‘sh bo‘lsa
+    if(parseInt(card.dataset.level)===level){
+        slot.appendChild(card);
+        slot.classList.add("correct");
+    }else{
+        alert("Bu daraja uchun mos emas!");
+    }
 }
 });
 
@@ -141,21 +133,6 @@ row.appendChild(slot);
 }
 pyramid.appendChild(row);
 }
-
-// YAKUNIY XULOSA
-document.getElementById("finish").addEventListener("click",()=>{
-let countLevel5=0;
-document.querySelectorAll(".slot").forEach(slot=>{
-let card=slot.querySelector(".card");
-if(card && parseInt(card.dataset.level)===5){
-countLevel5++;
-}
-});
-
-document.getElementById("result").innerHTML=
-"Siz tanlagan eng foydali odatlar soni: "+countLevel5+
-"<br><br>O'zingiz uchun savol: Qaysi odatni bugundan boshlaysiz?";
-});
 
 </script>
 
